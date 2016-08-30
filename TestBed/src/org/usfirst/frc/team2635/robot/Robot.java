@@ -52,7 +52,7 @@ public class Robot extends IterativeRobot {
     public void teleopPeriodic() 
     {
     	double stickA = joystick.getRawAxis(0);
-    	double stickB = joystick.getRawAxis(5);
+    	double stickB = joystick.getRawAxis(4);
     	
     	motorA.set(stickA);
     	motorB.set(stickB);

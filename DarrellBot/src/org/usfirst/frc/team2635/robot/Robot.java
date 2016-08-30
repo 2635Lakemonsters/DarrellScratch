@@ -17,7 +17,8 @@ import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
  * directory.
  */
 public class Robot extends IterativeRobot {
-    private static final int SHOOT_BUTTON = 5;
+    private static final int ON_TIME = 5;
+	private static final int SHOOT_BUTTON = 5;
 	private static final int JOYSTICKCHANNEL = 0;
 	private static final int AXISY_L = 1;
 	private static final int AXISY_R = 5;
@@ -32,13 +33,16 @@ public class Robot extends IterativeRobot {
     RobotDrive robotDriveTank;
     //Shooter myShooter;
     ShooterOneShot myShooterOneShot;
-    
+    Timer quickTime;
+    boolean motorON;
+    ShooterStateMachine myShooterSM;
 	
     /**
      * This function is run when the robot is first started up and should be
      * used for any initialization code.
      */
-    public void robotInit() {
+    @Override
+	public void robotInit() {
         chooser = new SendableChooser();
         chooser.addDefault("Default Auto", defaultAuto);
         chooser.addObject("My Auto", customAuto);
@@ -49,6 +53,8 @@ public class Robot extends IterativeRobot {
         //robotDriveTank = new RobotDrive(motorL, motorR);
         //myShooter = new Shooter(motorL,motorR);
         myShooterOneShot = new ShooterOneShot(motorL,motorR);
+        quickTime = new Timer();
+        myShooterSM = new ShooterStateMachine();
     }
     
 	/**
@@ -60,7 +66,8 @@ public class Robot extends IterativeRobot {
 	 * You can add additional auto modes by adding additional comparisons to the switch structure below with additional strings.
 	 * If using the SendableChooser make sure to add them to the chooser code above as well.
 	 */
-    public void autonomousInit() {
+    @Override
+	public void autonomousInit() {
     	autoSelected = (String) chooser.getSelected();
 //		autoSelected = SmartDashboard.getString("Auto Selector", defaultAuto);
 		System.out.println("Auto selected: " + autoSelected);
@@ -69,7 +76,8 @@ public class Robot extends IterativeRobot {
     /**
      * This function is called periodically during autonomous
      */
-    public void autonomousPeriodic() {
+    @Override
+	public void autonomousPeriodic() {
     	switch(autoSelected) {
     	case customAuto:
         //Put custom auto code here   
@@ -87,8 +95,14 @@ public class Robot extends IterativeRobot {
     private double modifyBeforeDrive(double invalue){
     	return invalue / 1.0;
     }
+    @Override 
+    public void teleopInit() {
+    	quickTime.start();
+    	motorL.set(1.0);
+    }
     
-    public void teleopPeriodic() {
+    @Override
+	public void teleopPeriodic() {
         //motor1.set(modifyBeforeDrive(myjoystick.getRawAxis(AXISY_L)));
         //motor2.set(modifyBeforeDrive(myjoystick.getRawAxis(AXISY_R)));
     	double tankL = myjoystick.getRawAxis(AXISY_L);
@@ -96,15 +110,26 @@ public class Robot extends IterativeRobot {
         //robotDriveTank.tankDrive(tankL, tankR);
         //myShooter.set(tankL);
         boolean shootIt = myjoystick.getRawButton(SHOOT_BUTTON);
-        myShooterOneShot.shootTheThing(shootIt);
-        
-        
+        //myShooterOneShot.shootTheThing(shootIt);
+        //motorL.set(modifyBeforeDrive(myjoystick.getRawAxis(AXISY_L)));
+//        if (quickTime.hasPeriodPassed(ON_TIME)){
+//        	motorON = !motorON;
+//        	quickTime.reset();
+//        } 
+//        if (motorON){
+//        	motorL.set(1.0);
+//        } else {
+//        	motorL.set(0.0);
+//        }
+        myShooterSM.update(shootIt);
+        motorL.set(myShooterSM.getMotorSpeed());
     }
     
     /**
      * This function is called periodically during test mode
      */
-    public void testPeriodic() {
+    @Override
+	public void testPeriodic() {
     
     }
     
