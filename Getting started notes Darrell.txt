@@ -1,0 +1,9 @@
+Create a new workspace folder
+File-->Switch Workspace (to new folder)
+File-->New-->Project (iterative robot)
+env variable JAVA_HOME C:\Program Files\Java\jdk1.8.0_77
+
+firefox http://roborio-2635-frc.local
+
+lakemonsters.software.team pw localuser
+lakemonsters.software.team@gmail.com
